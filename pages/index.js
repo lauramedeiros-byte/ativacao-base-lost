@@ -327,7 +327,7 @@ function btnStyle(bg, border, text) {
 function GroupBox({
   group, dragging, dragFrom,
   onDragStart, onDragEnd, onDrop,
-  onRename, onDelete,
+  onRename, onDelete, onMoveSection,
   messages, allTags, onMessagesChange, onAddTag,
   section,
 }) {
