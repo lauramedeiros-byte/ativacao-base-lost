@@ -67,22 +67,22 @@ const CARDS = {
 }
 
 const DEFAULT_GROUPS = [
-  { id: 'g1',  label: 'Timing / Momento',               cards: ['sz_timing','mk_timing'] },
-  { id: 'g2',  label: 'Concorrência',                    cards: ['sz_conc','mk_conc'] },
-  { id: 'g3',  label: 'Corretor / Imobiliária',          cards: ['sz_corretor','mk_corretor'] },
-  { id: 'g4',  label: 'Jurídico / Contratual',           cards: ['sz_juridico','mk_juridico'] },
-  { id: 'g5',  label: 'Duplicado / Erro Admin',          cards: ['sz_dup','mk_dup'] },
-  { id: 'g6',  label: 'Sem Contato / Inatingível',       cards: ['sz_contato','mk_naoresp','mk_parou','mk_origem'] },
-  { id: 'g7',  label: 'Perfil — Financeiro',             cards: ['sz_fgts','sz_pgto','sz_entrada','sz_total','mk_cond','mk_entrada','mk_total'] },
-  { id: 'g8',  label: 'Perfil — Produto / Características', cards: ['sz_tam','sz_garagem','sz_prazo','sz_spe','sz_cota','sz_outra_cota','mk_tam','mk_prazo','mk_spe','mk_loc'] },
-  { id: 'g9',  label: 'Perfil — Intenção Incompatível',  cards: ['sz_moradia','sz_hospede','sz_lgpd','sz_mora','mk_moradia'] },
-  { id: 'g10', label: 'Redirecionamento Interno',        cards: ['sz_mkt','sz_szs','sz_decor_enc','sz_lanc_enc','sz_cly','sz_anfitriao','mk_lanc'] },
-  { id: 'g11', label: 'Catch-all / Descrição Obrigatória', cards: ['sz_catch','mk_catch'] },
-  { id: 'g12', label: 'Imóvel fora do Perfil SZS',       cards: ['sz_icond','sz_idesc','sz_iitens'] },
-  { id: 'g13', label: 'Taxas / Custos Operacionais',     cards: ['sz_enxoval','sz_taxa_adm','sz_taxa_imp'] },
-  { id: 'g14', label: 'Exclusivo — Decor',               cards: ['sz_dcap','sz_dproj','sz_dobras'] },
-  { id: 'g15', label: 'Exclusivo — Expansão / B2B',      cards: ['sz_efut','sz_esem','sz_b2b','sz_parceiro','sz_cliente','sz_resgate'] },
-  { id: 'g16', label: 'Sem Grupo',                       cards: ['sz_vendeu','sz_regiao'] },
+  { id: 'g1',  section: 'fazer',     label: 'Timing / Momento',               cards: ['sz_timing','mk_timing'] },
+  { id: 'g2',  section: 'fazer',     label: 'Concorrência',                    cards: ['sz_conc','mk_conc'] },
+  { id: 'g3',  section: 'fazer',     label: 'Corretor / Imobiliária',          cards: ['sz_corretor','mk_corretor'] },
+  { id: 'g4',  section: 'fazer',     label: 'Jurídico / Contratual',           cards: ['sz_juridico','mk_juridico'] },
+  { id: 'g5',  section: 'naoFazer',  label: 'Duplicado / Erro Admin',          cards: ['sz_dup','mk_dup'] },
+  { id: 'g6',  section: 'fazer',     label: 'Sem Contato / Inatingível',       cards: ['sz_contato','mk_naoresp','mk_parou','mk_origem'] },
+  { id: 'g7',  section: 'fazer',     label: 'Perfil — Financeiro',             cards: ['sz_fgts','sz_pgto','sz_entrada','sz_total','mk_cond','mk_entrada','mk_total'] },
+  { id: 'g8',  section: 'fazer',     label: 'Perfil — Produto / Características', cards: ['sz_tam','sz_garagem','sz_prazo','sz_spe','sz_cota','sz_outra_cota','mk_tam','mk_prazo','mk_spe','mk_loc'] },
+  { id: 'g9',  section: 'naoFazer',  label: 'Perfil — Intenção Incompatível',  cards: ['sz_moradia','sz_hospede','sz_lgpd','sz_mora','mk_moradia'] },
+  { id: 'g10', section: 'naoFazer',  label: 'Redirecionamento Interno',        cards: ['sz_mkt','sz_szs','sz_decor_enc','sz_lanc_enc','sz_cly','sz_anfitriao','mk_lanc'] },
+  { id: 'g11', section: 'fazer',     label: 'Catch-all / Descrição Obrigatória', cards: ['sz_catch','mk_catch'] },
+  { id: 'g12', section: 'naoFazer',  label: 'Imóvel fora do Perfil SZS',       cards: ['sz_icond','sz_idesc','sz_iitens'] },
+  { id: 'g13', section: 'fazer',     label: 'Taxas / Custos Operacionais',     cards: ['sz_enxoval','sz_taxa_adm','sz_taxa_imp'] },
+  { id: 'g14', section: 'fazer',     label: 'Exclusivo — Decor',               cards: ['sz_dcap','sz_dproj','sz_dobras'] },
+  { id: 'g15', section: 'naoFazer',  label: 'Exclusivo — Expansão / B2B',      cards: ['sz_efut','sz_esem','sz_b2b','sz_parceiro','sz_cliente','sz_resgate'] },
+  { id: 'g16', section: 'naoFazer',  label: 'Sem Grupo',                       cards: ['sz_vendeu','sz_regiao'] },
 ]
 
 // ─── Colours ───────────────────────────────────────────────────────────────────
@@ -92,6 +92,9 @@ const C = {
   szBg: '#FAECE7', szBorder: '#F5C4B3', szText: '#993C1D', szBadge: '#F0997B', szBadgeText: '#4A1B0C',
   mkBg: '#E6F1FB', mkBorder: '#B5D4F4', mkText: '#185FA5', mkBadge: '#85B7EB', mkBadgeText: '#042C53',
   surface: '#fff', surfaceAlt: '#f8fafc',
+  // Section colors
+  sectionFazer: '#059669', sectionFazerBg: '#ecfdf5', sectionFazerBorder: '#6ee7b7',
+  sectionNaoFazer: '#64748b', sectionNaoFazerBg: '#f1f5f9', sectionNaoFazerBorder: '#cbd5e1',
 }
 
 // ─── Tag input with autocomplete ──────────────────────────────────────────────
@@ -326,6 +329,7 @@ function GroupBox({
   onDragStart, onDragEnd, onDrop,
   onRename, onDelete,
   messages, allTags, onMessagesChange, onAddTag,
+  section,
 }) {
   const [over, setOver] = useState(false)
   const [renaming, setRenaming] = useState(false)
@@ -338,19 +342,29 @@ function GroupBox({
   const finishRename = () => { onRename(group.id, renameVal.trim() || group.label); setRenaming(false) }
   const msgCount = (messages[group.id] || []).length
 
+  const isFazer = section === 'fazer'
+  const sectionColor = isFazer ? C.sectionFazer : C.sectionNaoFazer
+  const sectionBorderColor = isFazer ? C.sectionFazerBorder : C.sectionNaoFazerBorder
+  const subtleOpacity = isFazer ? 1 : 0.75
+
   return (
     <div
       style={{
-        background: C.surface, border: `1.5px solid ${over ? C.blue : C.border}`,
+        background: C.surface, border: `1.5px solid ${over ? sectionColor : sectionBorderColor}`,
         borderRadius: 10, display: 'flex', flexDirection: 'column',
-        transition: 'border-color .15s', boxShadow: over ? '0 0 0 3px #bfdbfe55' : 'none',
+        transition: 'border-color .15s, opacity .15s',
+        boxShadow: over ? `0 0 0 3px ${sectionColor}33` : 'none',
+        opacity: subtleOpacity,
       }}
       onDragOver={e => { e.preventDefault(); setOver(true) }}
       onDragLeave={() => setOver(false)}
-      onDrop={() => { setOver(false); onDrop(group.id) }}
+      onDrop={() => { setOver(false); onDrop(group.id, section) }}
     >
       {/* Header */}
-      <div style={{ padding: '8px 10px', display: 'flex', alignItems: 'center', gap: 6, borderBottom: `1px solid ${C.border}`, background: C.surfaceAlt, borderRadius: '9px 9px 0 0' }}>
+      <div style={{ padding: '8px 10px', display: 'flex', alignItems: 'center', gap: 6, borderBottom: `2px solid ${sectionBorderColor}`, background: isFazer ? '#f0fdf4' : '#f8fafc', borderRadius: '9px 9px 0 0' }}>
+        <span style={{ fontSize: 10, fontWeight: 600, color: sectionColor, background: `${sectionColor}15`, padding: '2px 6px', borderRadius: 4 }}>
+          {isFazer ? '✓ FAZER' : '✗ NÃO FAZER'}
+        </span>
         {renaming ? (
           <input
             ref={renameRef}
@@ -379,6 +393,15 @@ function GroupBox({
           onMouseOver={e => e.currentTarget.style.color = '#ef4444'}
           onMouseOut={e => e.currentTarget.style.color = '#cbd5e1'}
         >×</button>
+        <button
+          onClick={() => onMoveSection(group.id, isFazer ? 'naoFazer' : 'fazer')}
+          title={isFazer ? 'Mover para "Não Fazer"' : 'Mover para "Fazer"'}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#cbd5e1', fontSize: 11, padding: '2px 6px', flexShrink: 0, borderRadius: 4 }}
+          onMouseOver={e => { e.currentTarget.style.background = isFazer ? '#fee2e2' : '#dcfce7'; e.currentTarget.style.color = isFazer ? '#ef4444' : '#22c55e' }}
+          onMouseOut={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = '#cbd5e1' }}
+        >
+          {isFazer ? '→' : '←'}
+        </button>
       </div>
 
       {/* Cards */}
@@ -447,6 +470,83 @@ function GroupBox({
           onAddTag={onAddTag}
         />
       )}
+    </div>
+  )
+}
+
+// ─── Data sources header ──────────────────────────────────────────────────────
+function DataSources() {
+  return (
+    <div style={{
+      maxWidth: 1280, margin: '0 auto 24px',
+      background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
+      borderRadius: 16, padding: '24px 32px',
+      boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+        <span style={{ fontSize: 20 }}>📊</span>
+        <span style={{ fontWeight: 700, fontSize: 15, color: '#fff' }}>Fontes de Dados</span>
+        <span style={{ fontSize: 11, color: '#94a3b8', marginLeft: 8 }}>Base para classificação de losts</span>
+      </div>
+      <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+        <a
+          href="https://seazone-fund.slack.com/docs/TDLTVAWQ6/F0891A2JX1S"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: 'flex', alignItems: 'center', gap: 10,
+            background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)',
+            borderRadius: 10, padding: '12px 20px', textDecoration: 'none',
+            transition: 'all .2s',
+          }}
+          onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'}
+          onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+        >
+          <span style={{ fontSize: 24 }}>💬</span>
+          <div>
+            <div style={{ fontWeight: 600, fontSize: 13, color: '#fff' }}>Motivos de Perda — Marketplace</div>
+            <div style={{ fontSize: 11, color: '#94a3b8' }}>Slack • Seazone Fund</div>
+          </div>
+          <span style={{ marginLeft: 8, color: '#94a3b8', fontSize: 14 }}>↗</span>
+        </a>
+        <a
+          href="https://docs.google.com/spreadsheets/d/1J-aMXiH4P3pQ4nQlN79emsNBNSBx5sOp7JsILLGI_MY/edit?gid=956697078"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: 'flex', alignItems: 'center', gap: 10,
+            background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)',
+            borderRadius: 10, padding: '12px 20px', textDecoration: 'none',
+            transition: 'all .2s',
+          }}
+          onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'}
+          onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+        >
+          <span style={{ fontSize: 24 }}>📈</span>
+          <div>
+            <div style={{ fontWeight: 600, fontSize: 13, color: '#fff' }}>Motivos de Perda — SZI Lançamentos</div>
+            <div style={{ fontSize: 11, color: '#94a3b8' }}>Google Sheets • Classificação SZ</div>
+          </div>
+          <span style={{ marginLeft: 8, color: '#94a3b8', fontSize: 14 }}>↗</span>
+        </a>
+      </div>
+    </div>
+  )
+}
+
+// ─── Section header ───────────────────────────────────────────────────────────
+function SectionHeader({ icon, title, subtitle, color, bgColor }) {
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 12,
+      padding: '16px 20px', borderRadius: '12px 12px 0 0',
+      background: bgColor, borderBottom: `3px solid ${color}`,
+    }}>
+      <span style={{ fontSize: 28 }}>{icon}</span>
+      <div>
+        <div style={{ fontWeight: 700, fontSize: 16, color }}>{title}</div>
+        <div style={{ fontSize: 12, color: '#64748b' }}>{subtitle}</div>
+      </div>
     </div>
   )
 }
@@ -528,12 +628,17 @@ export default function Board() {
     setDragging(null); setDragFrom(null)
   }, [])
 
-  const handleDrop = useCallback((toGid) => {
-    if (!dragging || !dragFrom || dragFrom === toGid) return
+  const handleDrop = useCallback((toGid, toSection) => {
+    if (!dragging || !dragFrom) return
     const g = stateRef.current.groups
-    const from = g.find(x => x.id === dragFrom)
-    const to = g.find(x => x.id === toGid)
-    if (!from || !to) return
+    const fromGroup = g.find(x => x.id === dragFrom)
+    const toGroup = g.find(x => x.id === toGid)
+    if (!fromGroup || !toGroup) return
+    // If dropping on same group, just return
+    if (dragFrom === toGid) {
+      setDragging(null); setDragFrom(null)
+      return
+    }
     const next = g.map(gr => {
       if (gr.id === dragFrom) return { ...gr, cards: gr.cards.filter(c => c !== dragging) }
       if (gr.id === toGid && !gr.cards.includes(dragging)) return { ...gr, cards: [...gr.cards, dragging] }
@@ -560,9 +665,16 @@ export default function Board() {
     updateGroups(next)
   }, [updateGroups])
 
-  const addGroup = useCallback(() => {
-    const newGroup = { id: `g${gctr.current++}`, label: 'Novo grupo', cards: [] }
+  const addGroup = useCallback((section = 'fazer') => {
+    const newGroup = { id: `g${gctr.current++}`, section, label: 'Novo grupo', cards: [] }
     updateGroups([...stateRef.current.groups, newGroup])
+  }, [updateGroups])
+
+  const moveGroupSection = useCallback((gid, newSection) => {
+    const g = stateRef.current.groups.map(group =>
+      group.id === gid ? { ...group, section: newSection } : group
+    )
+    updateGroups(g)
   }, [updateGroups])
 
   // ── Loading ────────────────────────────────────────────────────────────────
@@ -574,10 +686,16 @@ export default function Board() {
     )
   }
 
+  const fazerGroups = groups.filter(g => (g.section || 'fazer') === 'fazer')
+  const naoFazerGroups = groups.filter(g => (g.section || 'fazer') === 'naoFazer')
+
   return (
     <div style={{ minHeight: '100vh', background: '#f1f5f9', padding: '20px 16px 48px' }}>
-      {/* ── Header ── */}
-      <div style={{ maxWidth: 1280, margin: '0 auto 20px' }}>
+      {/* ── Data Sources Header ── */}
+      <DataSources />
+
+      {/* ── Main Header ── */}
+      <div style={{ maxWidth: 1280, margin: '0 auto 24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
           <div style={{ fontWeight: 700, fontSize: 17, color: '#1e293b' }}>
             Motivos de Lost — Board
@@ -595,42 +713,132 @@ export default function Board() {
           <span style={{ fontSize: 12, color: saving ? '#f59e0b' : saveErr ? '#ef4444' : '#10b981', fontWeight: 500 }}>
             {saving ? '⟳ Salvando...' : saveErr ? '✕ Erro ao salvar' : '✓ Salvo'}
           </span>
-          <button
-            onClick={addGroup}
-            style={{ padding: '7px 14px', borderRadius: 8, border: `1.5px solid ${C.blue}`, background: C.blueSoft, color: C.blue, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
-          >
-            + Novo grupo
-          </button>
         </div>
         <p style={{ fontSize: 11, color: '#94a3b8', marginTop: 8 }}>
-          Arraste os cards entre grupos • Clique no nome do grupo para renomear • Clique em "Mensagens" para adicionar e-mails e WhatsApps segmentados
+          Arraste os cards entre grupos • Clique no nome do grupo para renomear • Use as setas ←/→ para mover grupos entre seções
         </p>
       </div>
 
-      {/* ── Board grid ── */}
-      <div style={{
-        maxWidth: 1280, margin: '0 auto',
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-        gap: 12, alignItems: 'start',
-      }}>
-        {groups.map(group => (
-          <GroupBox
-            key={group.id}
-            group={group}
-            dragging={dragging}
-            dragFrom={dragFrom}
-            onDragStart={handleDragStart}
-            onDragEnd={handleDragEnd}
-            onDrop={handleDrop}
-            onRename={renameGroup}
-            onDelete={deleteGroup}
-            messages={messages}
-            allTags={allTags}
-            onMessagesChange={updateMessages}
-            onAddTag={addTag}
+      {/* ── Section: FAZER MENSAGEM (Destaque) ── */}
+      <div style={{ maxWidth: 1280, margin: '0 auto 32px' }}>
+        <div style={{
+          background: C.sectionFazerBg,
+          border: `2px solid ${C.sectionFazerBorder}`,
+          borderRadius: 16,
+          overflow: 'hidden',
+          boxShadow: '0 4px 20px rgba(5, 150, 105, 0.1)',
+        }}>
+          <SectionHeader
+            icon="✅"
+            title="Fazer Mensagem"
+            subtitle={`${fazerGroups.length} grupo${fazerGroups.length !== 1 ? 's' : ''} • Arraste para esta seção os motivos que vamos criar ativação de base`}
+            color={C.sectionFazer}
+            bgColor={C.sectionFazerBg}
           />
-        ))}
+          <div style={{ padding: 16 }}>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+              gap: 12, alignItems: 'start',
+            }}>
+              {fazerGroups.map(group => (
+                <GroupBox
+                  key={group.id}
+                  group={group}
+                  section="fazer"
+                  dragging={dragging}
+                  dragFrom={dragFrom}
+                  onDragStart={handleDragStart}
+                  onDragEnd={handleDragEnd}
+                  onDrop={handleDrop}
+                  onRename={renameGroup}
+                  onDelete={deleteGroup}
+                  onMoveSection={moveGroupSection}
+                  messages={messages}
+                  allTags={allTags}
+                  onMessagesChange={updateMessages}
+                  onAddTag={addTag}
+                />
+              ))}
+            </div>
+            {fazerGroups.length === 0 && (
+              <div style={{ textAlign: 'center', padding: '40px 20px', color: '#64748b' }}>
+                <div style={{ fontSize: 32, marginBottom: 8 }}>📭</div>
+                <div>Nenhum grupo nesta seção</div>
+                <div style={{ fontSize: 12, marginTop: 4 }}>Use as setas ← nos grupos para mover para cá</div>
+              </div>
+            )}
+          </div>
+          <div style={{ padding: '12px 16px', background: '#f0fdf4', borderTop: '1px solid #bbf7d0' }}>
+            <button
+              onClick={() => addGroup('fazer')}
+              style={{ padding: '8px 16px', borderRadius: 8, border: `1.5px dashed ${C.sectionFazer}`, background: 'transparent', color: C.sectionFazer, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
+            >
+              + Novo grupo
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Section: NÃO FAZER MENSAGEM (Sutil) ── */}
+      <div style={{ maxWidth: 1280, margin: '0 auto' }}>
+        <div style={{
+          background: C.sectionNaoFazerBg,
+          border: `2px solid ${C.sectionNaoFazerBorder}`,
+          borderRadius: 16,
+          overflow: 'hidden',
+          opacity: 0.85,
+        }}>
+          <SectionHeader
+            icon="⏸️"
+            title="Não Fazer Mensagem"
+            subtitle={`${naoFazerGroups.length} grupo${naoFazerGroups.length !== 1 ? 's' : ''} • Motivos que não fazem sentido no momento para ativação`}
+            color={C.sectionNaoFazer}
+            bgColor={C.sectionNaoFazerBg}
+          />
+          <div style={{ padding: 16 }}>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+              gap: 12, alignItems: 'start',
+            }}>
+              {naoFazerGroups.map(group => (
+                <GroupBox
+                  key={group.id}
+                  group={group}
+                  section="naoFazer"
+                  dragging={dragging}
+                  dragFrom={dragFrom}
+                  onDragStart={handleDragStart}
+                  onDragEnd={handleDragEnd}
+                  onDrop={handleDrop}
+                  onRename={renameGroup}
+                  onDelete={deleteGroup}
+                  onMoveSection={moveGroupSection}
+                  messages={messages}
+                  allTags={allTags}
+                  onMessagesChange={updateMessages}
+                  onAddTag={addTag}
+                />
+              ))}
+            </div>
+            {naoFazerGroups.length === 0 && (
+              <div style={{ textAlign: 'center', padding: '40px 20px', color: '#94a3b8' }}>
+                <div style={{ fontSize: 32, marginBottom: 8 }}>📭</div>
+                <div>Nenhum grupo nesta seção</div>
+                <div style={{ fontSize: 12, marginTop: 4 }}>Use as setas ← nos grupos para mover para cá</div>
+              </div>
+            )}
+          </div>
+          <div style={{ padding: '12px 16px', background: '#f8fafc', borderTop: '1px solid #e2e8f0' }}>
+            <button
+              onClick={() => addGroup('naoFazer')}
+              style={{ padding: '8px 16px', borderRadius: 8, border: `1.5px dashed ${C.sectionNaoFazer}`, background: 'transparent', color: C.sectionNaoFazer, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
+            >
+              + Novo grupo
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   )
