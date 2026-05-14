@@ -222,19 +222,6 @@ function MessageEditor({ msg, allTags, onChange, onDelete, onAddTag }) {
           {isEmail ? '✉ E-mail' : '💬 WhatsApp'}
         </span>
         <span style={{ fontSize: 11, color: '#94a3b8', flex: 1, display: 'flex', flexWrap: 'wrap', gap: 3, alignItems: 'center' }}>
-          {msg.tags.length > 0 ? msg.tags.map(t => (
-            <span key={t} style={{
-              display: 'inline-flex', alignItems: 'center', gap: 3,
-              background: C.blueSoft, color: C.blue, border: `1px solid ${C.blueBorder}`,
-              borderRadius: 99, padding: '1px 7px', fontSize: 11,
-            }}>
-              {t}
-              <button
-                onClick={() => onChange({ ...msg, tags: msg.tags.filter(x => x !== t) })}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.blue, padding: 0, fontSize: 12, lineHeight: 1 }}
-              >×</button>
-            </span>
-          )) : <span style={{ color: '#cbd5e1' }}>sem tags</span>}
           {msg.comment && (
             <span style={{
               display: 'inline-flex', alignItems: 'center', gap: 3,
@@ -255,7 +242,7 @@ function MessageEditor({ msg, allTags, onChange, onDelete, onAddTag }) {
         >×</button>
       </div>
 
-      {/* Subject (email only) — no overflow truncation */}
+      {/* Subject (email only) */}
       {isEmail && (
         <div style={{ marginBottom: 8 }}>
           <input
@@ -263,16 +250,17 @@ function MessageEditor({ msg, allTags, onChange, onDelete, onAddTag }) {
             onChange={e => onChange({ ...msg, subject: e.target.value })}
             placeholder="Assunto do e-mail..."
             style={{
-              width: '100%', minWidth: 0, padding: '6px 10px',
+              width: '100%', maxWidth: '100%',
+              padding: '6px 10px',
               border: `1px solid ${C.border}`,
               borderRadius: 6, fontSize: 12, outline: 'none', background: C.surface,
               boxSizing: 'border-box',
-              overflow: 'visible',
+              overflow: 'hidden',
+              display: 'block',
             }}
-            title={msg.subject || ''}
           />
           {msg.subject && (
-            <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 2, paddingLeft: 2 }}>
+            <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 2, wordBreak: 'break-word', padding: '2px 2px 0' }}>
               Assunto: <strong style={{ color: '#64748b' }}>{msg.subject}</strong>
             </div>
           )}
@@ -325,14 +313,6 @@ function MessageEditor({ msg, allTags, onChange, onDelete, onAddTag }) {
         >
           {msg.comment ? '💬 Ver comentário' : '💬 Comentar'}
         </button>
-
-        <TagInput
-          allTags={allTags}
-          onAdd={tag => {
-            if (!msg.tags.includes(tag)) onChange({ ...msg, tags: [...msg.tags, tag] })
-            onAddTag(tag)
-          }}
-        />
       </div>
 
       {/* Comment area */}
