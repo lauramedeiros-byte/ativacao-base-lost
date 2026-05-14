@@ -901,9 +901,8 @@ export default function Board() {
     )
   }
 
-  const curtoGroups = groups.filter(g => g.section === 'curtoPrazo')
+  const curtoGroups = groups.filter(g => g.section === 'curtoPrazo' || g.section === 'fazer' || g.section == null)
   const longoGroups = groups.filter(g => g.section === 'longoPrazo')
-  const fazerGroups = groups.filter(g => g.section === 'fazer')
   const naoFazerGroups = groups.filter(g => g.section === 'naoFazer')
 
   // Build all groups for all sections
@@ -951,7 +950,7 @@ export default function Board() {
           <SectionHeader
             icon="✅"
             title="Fazer Mensagem"
-            subtitle={`${fazerGroups.length + curtoGroups.length + longoGroups.length} grupos • Divida em curto prazo (ação imediata) e longo prazo (planejamento)`}
+            subtitle={`${curtoGroups.length + longoGroups.length} grupos • Curto prazo (ação imediata) e longo prazo (planejamento)`}
             color={C.sectionFazer}
             bgColor="#f0fdf4"
           />
