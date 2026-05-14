@@ -211,6 +211,7 @@ function MessageEditor({ msg, allTags, onChange, onDelete, onAddTag }) {
     <div style={{
       border: `1px solid ${typeColor.border}`, borderRadius: 10,
       background: typeColor.bg, padding: 12, marginBottom: 10,
+      overflow: 'hidden',
     }}>
       {/* Header row with drag handle */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
@@ -256,8 +257,8 @@ function MessageEditor({ msg, allTags, onChange, onDelete, onAddTag }) {
               borderRadius: 6, fontSize: 12, outline: 'none', background: C.surface,
               boxSizing: 'border-box',
               wordBreak: 'break-word',
-              overflowWrap: 'break-word',
               minWidth: 0,
+              flexShrink: 1,
             }}
           />
         </div>
