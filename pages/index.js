@@ -250,20 +250,16 @@ function MessageEditor({ msg, allTags, onChange, onDelete, onAddTag }) {
             onChange={e => onChange({ ...msg, subject: e.target.value })}
             placeholder="Assunto do e-mail..."
             style={{
-              width: '100%', maxWidth: '100%',
+              width: '100%', display: 'block',
               padding: '6px 10px',
               border: `1px solid ${C.border}`,
               borderRadius: 6, fontSize: 12, outline: 'none', background: C.surface,
               boxSizing: 'border-box',
-              overflow: 'hidden',
-              display: 'block',
+              wordBreak: 'break-word',
+              overflowWrap: 'break-word',
+              minWidth: 0,
             }}
           />
-          {msg.subject && (
-            <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 2, wordBreak: 'break-word', padding: '2px 2px 0' }}>
-              Assunto: <strong style={{ color: '#64748b' }}>{msg.subject}</strong>
-            </div>
-          )}
         </div>
       )}
 
