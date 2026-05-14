@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef, useCallback, useReducer } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import '../styles/global.css'
 
 // ─── Card definitions ──────────────────────────────────────────────────────────
 const CARDS = {
@@ -66,25 +67,6 @@ const CARDS = {
   mk_lanc:      { l: 'Encaminhado p/ Lançamentos', s: 'mk' },
 }
 
-const DEFAULT_GROUPS = [
-  { id: 'g1',  section: 'fazer',     label: 'Timing / Momento',               cards: ['sz_timing','mk_timing'] },
-  { id: 'g2',  section: 'fazer',     label: 'Concorrência',                    cards: ['sz_conc','mk_conc'] },
-  { id: 'g3',  section: 'fazer',     label: 'Corretor / Imobiliária',          cards: ['sz_corretor','mk_corretor'] },
-  { id: 'g4',  section: 'fazer',     label: 'Jurídico / Contratual',           cards: ['sz_juridico','mk_juridico'] },
-  { id: 'g5',  section: 'naoFazer',  label: 'Duplicado / Erro Admin',          cards: ['sz_dup','mk_dup'] },
-  { id: 'g6',  section: 'fazer',     label: 'Sem Contato / Inatingível',       cards: ['sz_contato','mk_naoresp','mk_parou','mk_origem'] },
-  { id: 'g7',  section: 'fazer',     label: 'Perfil — Financeiro',             cards: ['sz_fgts','sz_pgto','sz_entrada','sz_total','mk_cond','mk_entrada','mk_total'] },
-  { id: 'g8',  section: 'fazer',     label: 'Perfil — Produto / Características', cards: ['sz_tam','sz_garagem','sz_prazo','sz_spe','sz_cota','sz_outra_cota','mk_tam','mk_prazo','mk_spe','mk_loc'] },
-  { id: 'g9',  section: 'naoFazer',  label: 'Perfil — Intenção Incompatível',  cards: ['sz_moradia','sz_hospede','sz_lgpd','sz_mora','mk_moradia'] },
-  { id: 'g10', section: 'naoFazer',  label: 'Redirecionamento Interno',        cards: ['sz_mkt','sz_szs','sz_decor_enc','sz_lanc_enc','sz_cly','sz_anfitriao','mk_lanc'] },
-  { id: 'g11', section: 'fazer',     label: 'Catch-all / Descrição Obrigatória', cards: ['sz_catch','mk_catch'] },
-  { id: 'g12', section: 'naoFazer',  label: 'Imóvel fora do Perfil SZS',       cards: ['sz_icond','sz_idesc','sz_iitens'] },
-  { id: 'g13', section: 'fazer',     label: 'Taxas / Custos Operacionais',     cards: ['sz_enxoval','sz_taxa_adm','sz_taxa_imp'] },
-  { id: 'g14', section: 'fazer',     label: 'Exclusivo — Decor',               cards: ['sz_dcap','sz_dproj','sz_dobras'] },
-  { id: 'g15', section: 'naoFazer',  label: 'Exclusivo — Expansão / B2B',      cards: ['sz_efut','sz_esem','sz_b2b','sz_parceiro','sz_cliente','sz_resgate'] },
-  { id: 'g16', section: 'naoFazer',  label: 'Sem Grupo',                       cards: ['sz_vendeu','sz_regiao'] },
-]
-
 // ─── Colours ───────────────────────────────────────────────────────────────────
 const C = {
   blue: '#1d4ed8', blueSoft: '#eff6ff', blueBorder: '#bfdbfe',
@@ -92,9 +74,10 @@ const C = {
   szBg: '#FAECE7', szBorder: '#F5C4B3', szText: '#993C1D', szBadge: '#F0997B', szBadgeText: '#4A1B0C',
   mkBg: '#E6F1FB', mkBorder: '#B5D4F4', mkText: '#185FA5', mkBadge: '#85B7EB', mkBadgeText: '#042C53',
   surface: '#fff', surfaceAlt: '#f8fafc',
-  // Section colors
   sectionFazer: '#059669', sectionFazerBg: '#ecfdf5', sectionFazerBorder: '#6ee7b7',
   sectionNaoFazer: '#64748b', sectionNaoFazerBg: '#f1f5f9', sectionNaoFazerBorder: '#cbd5e1',
+  curtoBg: '#fffbeb', curtoBorder: '#fcd34d', curtoColor: '#b45309',
+  longoBg: '#eff6ff', longoBorder: '#93c5fd', longoColor: '#1e40af',
 }
 
 // ─── Tag input with autocomplete ──────────────────────────────────────────────
@@ -189,30 +172,62 @@ function TagInput({ allTags, onAdd }) {
   )
 }
 
+// ─── Drag handle for message reorder ─────────────────────────────────────────
+function DragHandle({ style }) {
+  return (
+    <div style={{ cursor: 'grab', color: '#cbd5e1', fontSize: 16, padding: '0 4px', flexShrink: 0, userSelect: 'none', ...style }}
+      title="Arraste para reordenar"
+    >
+      ⠿
+    </div>
+  )
+}
+
 // ─── Single message editor ────────────────────────────────────────────────────
 function MessageEditor({ msg, allTags, onChange, onDelete, onAddTag }) {
   const isEmail = msg.type === 'email'
   const typeColor = isEmail ? { bg: '#f0fdf4', border: '#86efac', text: '#15803d' } : { bg: '#fff7ed', border: '#fdba74', text: '#c2410c' }
+  const [showComment, setShowComment] = useState(!!msg.comment)
+  const [imagePreview, setImagePreview] = useState(msg.image || null)
+  const fileRef = useRef(null)
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      const b64 = ev.target.result
+      setImagePreview(b64)
+      onChange({ ...msg, image: b64 })
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const removeImage = () => {
+    setImagePreview(null)
+    onChange({ ...msg, image: null })
+  }
 
   return (
     <div style={{
       border: `1px solid ${typeColor.border}`, borderRadius: 10,
       background: typeColor.bg, padding: 12, marginBottom: 10,
     }}>
-      {/* Header row */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+      {/* Header row with drag handle */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
+        <DragHandle />
         <span style={{
           padding: '3px 10px', borderRadius: 99, fontSize: 11, fontWeight: 600,
           background: typeColor.border, color: typeColor.text, flexShrink: 0,
         }}>
           {isEmail ? '✉ E-mail' : '💬 WhatsApp'}
         </span>
-        <span style={{ fontSize: 11, color: '#94a3b8', flex: 1 }}>
+        <span style={{ fontSize: 11, color: '#94a3b8', flex: 1, display: 'flex', flexWrap: 'wrap', gap: 3, alignItems: 'center' }}>
           {msg.tags.length > 0 ? msg.tags.map(t => (
             <span key={t} style={{
               display: 'inline-flex', alignItems: 'center', gap: 3,
               background: C.blueSoft, color: C.blue, border: `1px solid ${C.blueBorder}`,
-              borderRadius: 99, padding: '1px 7px', fontSize: 11, marginRight: 4, marginBottom: 2,
+              borderRadius: 99, padding: '1px 7px', fontSize: 11,
             }}>
               {t}
               <button
@@ -221,25 +236,48 @@ function MessageEditor({ msg, allTags, onChange, onDelete, onAddTag }) {
               >×</button>
             </span>
           )) : <span style={{ color: '#cbd5e1' }}>sem tags</span>}
+          {msg.comment && (
+            <span style={{
+              display: 'inline-flex', alignItems: 'center', gap: 3,
+              background: '#fef9c3', color: '#854d0e', border: '1px solid #fde047',
+              borderRadius: 99, padding: '1px 7px', fontSize: 11, cursor: 'pointer',
+            }}
+              onClick={() => setShowComment(v => !v)}
+              title="Ver comentário"
+            >
+              💬 {msg.comment.slice(0, 30)}{msg.comment.length > 30 ? '...' : ''}
+            </span>
+          )}
         </span>
         <button
           onClick={() => onDelete(msg.id)}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', fontSize: 18, lineHeight: 1, padding: '0 2px' }}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', fontSize: 18, lineHeight: 1, padding: '0 2px', flexShrink: 0 }}
           title="Remover mensagem"
         >×</button>
       </div>
 
-      {/* Subject (email only) */}
+      {/* Subject (email only) — no overflow truncation */}
       {isEmail && (
-        <input
-          value={msg.subject || ''}
-          onChange={e => onChange({ ...msg, subject: e.target.value })}
-          placeholder="Assunto do e-mail..."
-          style={{
-            width: '100%', padding: '6px 10px', border: `1px solid ${C.border}`,
-            borderRadius: 6, fontSize: 12, marginBottom: 8, outline: 'none', background: C.surface,
-          }}
-        />
+        <div style={{ marginBottom: 8 }}>
+          <input
+            value={msg.subject || ''}
+            onChange={e => onChange({ ...msg, subject: e.target.value })}
+            placeholder="Assunto do e-mail..."
+            style={{
+              width: '100%', minWidth: 0, padding: '6px 10px',
+              border: `1px solid ${C.border}`,
+              borderRadius: 6, fontSize: 12, outline: 'none', background: C.surface,
+              boxSizing: 'border-box',
+              overflow: 'visible',
+            }}
+            title={msg.subject || ''}
+          />
+          {msg.subject && (
+            <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 2, paddingLeft: 2 }}>
+              Assunto: <strong style={{ color: '#64748b' }}>{msg.subject}</strong>
+            </div>
+          )}
+        </div>
       )}
 
       {/* Content */}
@@ -251,12 +289,44 @@ function MessageEditor({ msg, allTags, onChange, onDelete, onAddTag }) {
         style={{
           width: '100%', padding: '7px 10px', border: `1px solid ${C.border}`,
           borderRadius: 6, fontSize: 12, resize: 'vertical', outline: 'none',
-          background: C.surface, lineHeight: 1.5,
+          background: C.surface, lineHeight: 1.5, boxSizing: 'border-box',
         }}
       />
 
-      {/* Tag input */}
-      <div style={{ display: 'flex', gap: 6, marginTop: 8, alignItems: 'center' }}>
+      {/* Image preview */}
+      {imagePreview && (
+        <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 8, padding: 8 }}>
+          <img src={imagePreview} alt="Imagem da mensagem" style={{ width: 64, height: 64, objectFit: 'cover', borderRadius: 6, border: `1px solid ${C.border}` }} />
+          <div>
+            <div style={{ fontSize: 11, color: '#64748b' }}>Imagem anexada</div>
+            <button
+              onClick={removeImage}
+              style={{ marginTop: 4, padding: '3px 10px', borderRadius: 6, border: `1px solid #fca5a5`, background: '#fef2f2', color: '#dc2626', fontSize: 11, cursor: 'pointer' }}
+            >
+              Remover imagem
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Actions row: image upload + comment toggle */}
+      <div style={{ display: 'flex', gap: 6, marginTop: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+        <button
+          onClick={() => fileRef.current?.click()}
+          style={{ padding: '5px 12px', borderRadius: 7, border: `1px solid #cbd5e1`, background: C.surface, color: '#64748b', fontSize: 11, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
+          title="Inserir imagem"
+        >
+          🖼️ Imagem
+        </button>
+        <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleImageUpload} />
+
+        <button
+          onClick={() => setShowComment(v => !v)}
+          style={{ padding: '5px 12px', borderRadius: 7, border: `1px solid #cbd5e1`, background: msg.comment ? '#fef9c3' : C.surface, color: msg.comment ? '#854d0e' : '#64748b', fontSize: 11, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
+        >
+          {msg.comment ? '💬 Ver comentário' : '💬 Comentar'}
+        </button>
+
         <TagInput
           allTags={allTags}
           onAdd={tag => {
@@ -265,17 +335,36 @@ function MessageEditor({ msg, allTags, onChange, onDelete, onAddTag }) {
           }}
         />
       </div>
+
+      {/* Comment area */}
+      {showComment && (
+        <div style={{ marginTop: 8 }}>
+          <textarea
+            value={msg.comment || ''}
+            onChange={e => onChange({ ...msg, comment: e.target.value })}
+            placeholder="Adicione um comentário sobre esta mensagem (ex: ajustar texto, mudar tom, referência da Laura...)"
+            rows={2}
+            style={{
+              width: '100%', padding: '7px 10px', border: `1px solid #fde047`,
+              borderRadius: 6, fontSize: 12, resize: 'vertical', outline: 'none',
+              background: '#fef9c3', lineHeight: 1.5, boxSizing: 'border-box',
+              color: '#854d0e',
+            }}
+          />
+        </div>
+      )}
     </div>
   )
 }
 
-// ─── Messages panel ───────────────────────────────────────────────────────────
+// ─── Messages panel with drag-to-reorder ─────────────────────────────────────
 function MessagesPanel({ groupId, messages, allTags, onChange, onAddTag }) {
   const msgs = messages[groupId] || []
   const msgCtr = useRef(Date.now())
+  const [dragMsg, setDragMsg] = useState(null)
 
   const addMsg = (type) => {
-    const newMsg = { id: `msg_${msgCtr.current++}`, type, content: '', subject: '', tags: [] }
+    const newMsg = { id: `msg_${msgCtr.current++}`, type, content: '', subject: '', tags: [], comment: '', image: null }
     onChange({ ...messages, [groupId]: [...msgs, newMsg] })
   }
 
@@ -287,22 +376,46 @@ function MessagesPanel({ groupId, messages, allTags, onChange, onAddTag }) {
     onChange({ ...messages, [groupId]: msgs.filter(m => m.id !== id) })
   }
 
+  const handleMsgDragStart = (msgId) => setDragMsg(msgId)
+  const handleMsgDragEnd = () => setDragMsg(null)
+
+  const handleMsgDrop = (targetId) => {
+    if (!dragMsg || dragMsg === targetId) { setDragMsg(null); return }
+    const arr = [...msgs]
+    const fromIdx = arr.findIndex(m => m.id === dragMsg)
+    const toIdx = arr.findIndex(m => m.id === targetId)
+    if (fromIdx === -1 || toIdx === -1) { setDragMsg(null); return }
+    const [moved] = arr.splice(fromIdx, 1)
+    arr.splice(toIdx, 0, moved)
+    onChange({ ...messages, [groupId]: arr })
+    setDragMsg(null)
+  }
+
   return (
     <div style={{ borderTop: `1px solid ${C.border}`, padding: '12px 12px 4px', background: '#fafbff' }}>
       {msgs.length === 0 && (
         <p style={{ fontSize: 12, color: '#94a3b8', marginBottom: 10, textAlign: 'center' }}>
-          Nenhuma mensagem neste grupo ainda.
+          Nenhuma mensagem neste grupo ainda. Adicione abaixo.
         </p>
       )}
-      {msgs.map(msg => (
-        <MessageEditor
+      {msgs.map((msg, idx) => (
+        <div
           key={msg.id}
-          msg={msg}
-          allTags={allTags}
-          onChange={updateMsg}
-          onDelete={deleteMsg}
-          onAddTag={onAddTag}
-        />
+          draggable
+          onDragStart={() => handleMsgDragStart(msg.id)}
+          onDragEnd={handleMsgDragEnd}
+          onDragOver={e => { e.preventDefault(); e.stopPropagation() }}
+          onDrop={e => { e.preventDefault(); e.stopPropagation(); handleMsgDrop(msg.id) }}
+          style={{ opacity: dragMsg === msg.id ? 0.4 : 1, transition: 'opacity .15s' }}
+        >
+          <MessageEditor
+            msg={msg}
+            allTags={allTags}
+            onChange={updateMsg}
+            onDelete={deleteMsg}
+            onAddTag={onAddTag}
+          />
+        </div>
       ))}
       <div style={{ display: 'flex', gap: 6, paddingBottom: 8 }}>
         <button onClick={() => addMsg('email')} style={btnStyle('#f0fdf4', '#86efac', '#15803d')}>
@@ -312,6 +425,11 @@ function MessagesPanel({ groupId, messages, allTags, onChange, onAddTag }) {
           + WhatsApp
         </button>
       </div>
+      {msgs.length > 1 && (
+        <p style={{ fontSize: 10, color: '#94a3b8', textAlign: 'center', marginBottom: 4 }}>
+          ⠿ Arraste as mensagens para reordenar a sequência de envio
+        </p>
+      )}
     </div>
   )
 }
@@ -342,10 +460,8 @@ function GroupBox({
   const finishRename = () => { onRename(group.id, renameVal.trim() || group.label); setRenaming(false) }
   const msgCount = (messages[group.id] || []).length
 
-  const isFazer = section === 'fazer'
-  const sectionColor = isFazer ? C.sectionFazer : C.sectionNaoFazer
-  const sectionBorderColor = isFazer ? C.sectionFazerBorder : C.sectionNaoFazerBorder
-  const subtleOpacity = isFazer ? 1 : 0.75
+  const sectionColor = getSectionColor(section)
+  const sectionBorderColor = getSectionBorderColor(section)
 
   return (
     <div
@@ -354,16 +470,15 @@ function GroupBox({
         borderRadius: 10, display: 'flex', flexDirection: 'column',
         transition: 'border-color .15s, opacity .15s',
         boxShadow: over ? `0 0 0 3px ${sectionColor}33` : 'none',
-        opacity: subtleOpacity,
       }}
       onDragOver={e => { e.preventDefault(); setOver(true) }}
       onDragLeave={() => setOver(false)}
       onDrop={() => { setOver(false); onDrop(group.id, section) }}
     >
       {/* Header */}
-      <div style={{ padding: '8px 10px', display: 'flex', alignItems: 'center', gap: 6, borderBottom: `2px solid ${sectionBorderColor}`, background: isFazer ? '#f0fdf4' : '#f8fafc', borderRadius: '9px 9px 0 0' }}>
+      <div style={{ padding: '8px 10px', display: 'flex', alignItems: 'center', gap: 6, borderBottom: `2px solid ${sectionBorderColor}`, background: getSectionBg(section), borderRadius: '9px 9px 0 0' }}>
         <span style={{ fontSize: 10, fontWeight: 600, color: sectionColor, background: `${sectionColor}15`, padding: '2px 6px', borderRadius: 4 }}>
-          {isFazer ? '✓ FAZER' : '✗ NÃO FAZER'}
+          {getSectionLabel(section)}
         </span>
         {renaming ? (
           <input
@@ -394,13 +509,13 @@ function GroupBox({
           onMouseOut={e => e.currentTarget.style.color = '#cbd5e1'}
         >×</button>
         <button
-          onClick={() => onMoveSection(group.id, isFazer ? 'naoFazer' : 'fazer')}
-          title={isFazer ? 'Mover para "Não Fazer"' : 'Mover para "Fazer"'}
+          onClick={() => onMoveSection(group.id, getNextSection(section))}
+          title="Mover para outra seção"
           style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#cbd5e1', fontSize: 11, padding: '2px 6px', flexShrink: 0, borderRadius: 4 }}
-          onMouseOver={e => { e.currentTarget.style.background = isFazer ? '#fee2e2' : '#dcfce7'; e.currentTarget.style.color = isFazer ? '#ef4444' : '#22c55e' }}
+          onMouseOver={e => { e.currentTarget.style.background = section === 'naoFazer' ? '#dcfce7' : '#fee2e2'; e.currentTarget.style.color = section === 'naoFazer' ? '#22c55e' : '#ef4444' }}
           onMouseOut={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = '#cbd5e1' }}
         >
-          {isFazer ? '→' : '←'}
+          {section === 'naoFazer' ? '←' : '→'}
         </button>
       </div>
 
@@ -474,6 +589,40 @@ function GroupBox({
   )
 }
 
+function getSectionColor(section) {
+  if (section === 'curtoPrazo') return C.curtoColor
+  if (section === 'longoPrazo') return C.longoColor
+  if (section === 'fazer') return C.sectionFazer
+  return C.sectionNaoFazer
+}
+
+function getSectionBorderColor(section) {
+  if (section === 'curtoPrazo') return C.curtoBorder
+  if (section === 'longoPrazo') return C.longoBorder
+  if (section === 'fazer') return C.sectionFazerBorder
+  return C.sectionNaoFazerBorder
+}
+
+function getSectionBg(section) {
+  if (section === 'curtoPrazo') return C.curtoBg
+  if (section === 'longoPrazo') return C.longoBg
+  if (section === 'fazer') return '#f0fdf4'
+  return '#f8fafc'
+}
+
+function getSectionLabel(section) {
+  if (section === 'curtoPrazo') return '⚡ CURTO PRAZO'
+  if (section === 'longoPrazo') return '📆 LONGO PRAZO'
+  if (section === 'fazer') return '✓ FAZER'
+  return '✗ NÃO FAZER'
+}
+
+function getNextSection(current) {
+  const order = ['curtoPrazo', 'longoPrazo', 'fazer', 'naoFazer']
+  const idx = order.indexOf(current)
+  return order[(idx + 1) % order.length]
+}
+
 // ─── Data sources header ──────────────────────────────────────────────────────
 function DataSources() {
   return (
@@ -535,7 +684,7 @@ function DataSources() {
 }
 
 // ─── Section header ───────────────────────────────────────────────────────────
-function SectionHeader({ icon, title, subtitle, color, bgColor }) {
+function SectionHeader({ icon, title, subtitle, color, bgColor, count }) {
   return (
     <div style={{
       display: 'flex', alignItems: 'center', gap: 12,
@@ -543,9 +692,77 @@ function SectionHeader({ icon, title, subtitle, color, bgColor }) {
       background: bgColor, borderBottom: `3px solid ${color}`,
     }}>
       <span style={{ fontSize: 28 }}>{icon}</span>
-      <div>
+      <div style={{ flex: 1 }}>
         <div style={{ fontWeight: 700, fontSize: 16, color }}>{title}</div>
         <div style={{ fontSize: 12, color: '#64748b' }}>{subtitle}</div>
+      </div>
+      {count !== undefined && (
+        <span style={{ background: `${color}22`, color, border: `1px solid ${color}44`, borderRadius: 99, padding: '3px 12px', fontSize: 12, fontWeight: 600 }}>
+          {count} grupo{count !== 1 ? 's' : ''}
+        </span>
+      )}
+    </div>
+  )
+}
+
+// ─── Section block (used for curto prazo, longo prazo, nao fazer) ────────────
+function SectionBlock({ sectionKey, icon, title, subtitle, color, bgColor, borderColor, groups, allGroups, dragging, dragFrom, handleDragStart, handleDragEnd, handleDrop, renameGroup, deleteGroup, moveGroupSection, messages, allTags, onMessagesChange, onAddTag }) {
+  const sectionGroups = groups.filter(g => (g.section || 'fazer') === sectionKey)
+  const filteredAll = allGroups.filter(g => (g.section || 'fazer') === sectionKey)
+
+  const addGroup = () => {
+    // accessed via parent
+  }
+
+  return (
+    <div style={{
+      background: bgColor,
+      border: `2px solid ${borderColor}`,
+      borderRadius: 16,
+      overflow: 'hidden',
+      opacity: 0.92,
+    }}>
+      <SectionHeader
+        icon={icon}
+        title={title}
+        subtitle={subtitle}
+        color={color}
+        bgColor={bgColor}
+        count={sectionGroups.length}
+      />
+      <div style={{ padding: 16 }}>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+          gap: 12, alignItems: 'start',
+        }}>
+          {sectionGroups.map(group => (
+            <GroupBox
+              key={group.id}
+              group={group}
+              section={sectionKey}
+              dragging={dragging}
+              dragFrom={dragFrom}
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
+              onDrop={handleDrop}
+              onRename={renameGroup}
+              onDelete={deleteGroup}
+              onMoveSection={moveGroupSection}
+              messages={messages}
+              allTags={allTags}
+              onMessagesChange={onMessagesChange}
+              onAddTag={onAddTag}
+            />
+          ))}
+        </div>
+        {sectionGroups.length === 0 && (
+          <div style={{ textAlign: 'center', padding: '40px 20px', color: '#94a3b8' }}>
+            <div style={{ fontSize: 32, marginBottom: 8 }}>📭</div>
+            <div>Nenhum grupo nesta seção</div>
+            <div style={{ fontSize: 12, marginTop: 4 }}>Use as setas nos grupos para mover para cá</div>
+          </div>
+        )}
       </div>
     </div>
   )
@@ -634,7 +851,6 @@ export default function Board() {
     const fromGroup = g.find(x => x.id === dragFrom)
     const toGroup = g.find(x => x.id === toGid)
     if (!fromGroup || !toGroup) return
-    // If dropping on same group, just return
     if (dragFrom === toGid) {
       setDragging(null); setDragFrom(null)
       return
@@ -665,7 +881,7 @@ export default function Board() {
     updateGroups(next)
   }, [updateGroups])
 
-  const addGroup = useCallback((section = 'fazer') => {
+  const addGroup = useCallback((section = 'curtoPrazo') => {
     const newGroup = { id: `g${gctr.current++}`, section, label: 'Novo grupo', cards: [] }
     updateGroups([...stateRef.current.groups, newGroup])
   }, [updateGroups])
@@ -686,8 +902,13 @@ export default function Board() {
     )
   }
 
-  const fazerGroups = groups.filter(g => (g.section || 'fazer') === 'fazer')
-  const naoFazerGroups = groups.filter(g => (g.section || 'fazer') === 'naoFazer')
+  const curtoGroups = groups.filter(g => g.section === 'curtoPrazo')
+  const longoGroups = groups.filter(g => g.section === 'longoPrazo')
+  const fazerGroups = groups.filter(g => g.section === 'fazer')
+  const naoFazerGroups = groups.filter(g => g.section === 'naoFazer')
+
+  // Build all groups for all sections
+  const allGroups = groups
 
   return (
     <div style={{ minHeight: '100vh', background: '#f1f5f9', padding: '20px 16px 48px' }}>
@@ -715,14 +936,14 @@ export default function Board() {
           </span>
         </div>
         <p style={{ fontSize: 11, color: '#94a3b8', marginTop: 8 }}>
-          Arraste os cards entre grupos • Clique no nome do grupo para renomear • Use as setas ←/→ para mover grupos entre seções
+          Arraste os cards entre grupos • Clique no nome do grupo para renomear • Arraste mensagens para reordenar envio • Use as setas para mover grupos entre seções
         </p>
       </div>
 
-      {/* ── Section: FAZER MENSAGEM (Destaque) ── */}
+      {/* ── SEÇÃO: FAZER MENSAGEM → dividida em Curto e Longo ── */}
       <div style={{ maxWidth: 1280, margin: '0 auto 32px' }}>
         <div style={{
-          background: C.sectionFazerBg,
+          background: '#f0fdf4',
           border: `2px solid ${C.sectionFazerBorder}`,
           borderRadius: 16,
           overflow: 'hidden',
@@ -731,115 +952,184 @@ export default function Board() {
           <SectionHeader
             icon="✅"
             title="Fazer Mensagem"
-            subtitle={`${fazerGroups.length} grupo${fazerGroups.length !== 1 ? 's' : ''} • Arraste para esta seção os motivos que vamos criar ativação de base`}
+            subtitle={`${fazerGroups.length + curtoGroups.length + longoGroups.length} grupos • Divida em curto prazo (ação imediata) e longo prazo (planejamento)`}
             color={C.sectionFazer}
-            bgColor={C.sectionFazerBg}
+            bgColor="#f0fdf4"
           />
-          <div style={{ padding: 16 }}>
+          <div style={{ padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: 20 }}>
+
+            {/* Curto Prazo */}
             <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-              gap: 12, alignItems: 'start',
+              background: C.curtoBg,
+              border: `2px solid ${C.curtoBorder}`,
+              borderRadius: 12,
+              overflow: 'hidden',
             }}>
-              {fazerGroups.map(group => (
-                <GroupBox
-                  key={group.id}
-                  group={group}
-                  section="fazer"
-                  dragging={dragging}
-                  dragFrom={dragFrom}
-                  onDragStart={handleDragStart}
-                  onDragEnd={handleDragEnd}
-                  onDrop={handleDrop}
-                  onRename={renameGroup}
-                  onDelete={deleteGroup}
-                  onMoveSection={moveGroupSection}
-                  messages={messages}
-                  allTags={allTags}
-                  onMessagesChange={updateMessages}
-                  onAddTag={addTag}
-                />
-              ))}
-            </div>
-            {fazerGroups.length === 0 && (
-              <div style={{ textAlign: 'center', padding: '40px 20px', color: '#64748b' }}>
-                <div style={{ fontSize: 32, marginBottom: 8 }}>📭</div>
-                <div>Nenhum grupo nesta seção</div>
-                <div style={{ fontSize: 12, marginTop: 4 }}>Use as setas ← nos grupos para mover para cá</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', borderBottom: `2px solid ${C.curtoBorder}`, background: `${C.curtoBorder}33` }}>
+                <span style={{ fontSize: 22 }}>⚡</span>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: 14, color: C.curtoColor }}>Curto Prazo</div>
+                  <div style={{ fontSize: 11, color: '#92400e' }}>Ação imediata — urgência de contato</div>
+                </div>
+                <span style={{ marginLeft: 'auto', background: `${C.curtoColor}22`, color: C.curtoColor, border: `1px solid ${C.curtoColor}44`, borderRadius: 99, padding: '2px 10px', fontSize: 11, fontWeight: 600 }}>
+                  {curtoGroups.length} grupo{curtoGroups.length !== 1 ? 's' : ''}
+                </span>
               </div>
-            )}
-          </div>
-          <div style={{ padding: '12px 16px', background: '#f0fdf4', borderTop: '1px solid #bbf7d0' }}>
-            <button
-              onClick={() => addGroup('fazer')}
-              style={{ padding: '8px 16px', borderRadius: 8, border: `1.5px dashed ${C.sectionFazer}`, background: 'transparent', color: C.sectionFazer, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
-            >
-              + Novo grupo
-            </button>
+              <div style={{ padding: 16 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12, alignItems: 'start' }}>
+                  {curtoGroups.map(group => (
+                    <GroupBox
+                      key={group.id}
+                      group={group}
+                      section="curtoPrazo"
+                      dragging={dragging}
+                      dragFrom={dragFrom}
+                      onDragStart={handleDragStart}
+                      onDragEnd={handleDragEnd}
+                      onDrop={handleDrop}
+                      onRename={renameGroup}
+                      onDelete={deleteGroup}
+                      onMoveSection={moveGroupSection}
+                      messages={messages}
+                      allTags={allTags}
+                      onMessagesChange={updateMessages}
+                      onAddTag={addTag}
+                    />
+                  ))}
+                </div>
+                {curtoGroups.length === 0 && (
+                  <div style={{ textAlign: 'center', padding: '24px 20px', color: '#b45309' }}>
+                    <div style={{ fontSize: 28, marginBottom: 6 }}>⚡</div>
+                    <div style={{ fontSize: 12 }}>Nenhum grupo de curto prazo</div>
+                    <div style={{ fontSize: 11, marginTop: 2, color: '#92400e' }}>Use as setas nos grupos ou adicione abaixo</div>
+                  </div>
+                )}
+              </div>
+              <div style={{ padding: '10px 16px', background: `${C.curtoBorder}33`, borderTop: `1px solid ${C.curtoBorder}55` }}>
+                <button
+                  onClick={() => addGroup('curtoPrazo')}
+                  style={{ padding: '6px 14px', borderRadius: 8, border: `1.5px dashed ${C.curtoColor}`, background: 'transparent', color: C.curtoColor, fontSize: 11, fontWeight: 600, cursor: 'pointer' }}
+                >
+                  + Novo grupo — Curto Prazo
+                </button>
+              </div>
+            </div>
+
+            {/* Longo Prazo */}
+            <div style={{
+              background: C.longoBg,
+              border: `2px solid ${C.longoBorder}`,
+              borderRadius: 12,
+              overflow: 'hidden',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', borderBottom: `2px solid ${C.longoBorder}`, background: `${C.longoBorder}33` }}>
+                <span style={{ fontSize: 22 }}>📆</span>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: 14, color: C.longoColor }}>Longo Prazo</div>
+                  <div style={{ fontSize: 11, color: '#1e40af' }}>Planejamento — follow-up往后</div>
+                </div>
+                <span style={{ marginLeft: 'auto', background: `${C.longoColor}22`, color: C.longoColor, border: `1px solid ${C.longoColor}44`, borderRadius: 99, padding: '2px 10px', fontSize: 11, fontWeight: 600 }}>
+                  {longoGroups.length} grupo{longoGroups.length !== 1 ? 's' : ''}
+                </span>
+              </div>
+              <div style={{ padding: 16 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12, alignItems: 'start' }}>
+                  {longoGroups.map(group => (
+                    <GroupBox
+                      key={group.id}
+                      group={group}
+                      section="longoPrazo"
+                      dragging={dragging}
+                      dragFrom={dragFrom}
+                      onDragStart={handleDragStart}
+                      onDragEnd={handleDragEnd}
+                      onDrop={handleDrop}
+                      onRename={renameGroup}
+                      onDelete={deleteGroup}
+                      onMoveSection={moveGroupSection}
+                      messages={messages}
+                      allTags={allTags}
+                      onMessagesChange={updateMessages}
+                      onAddTag={addTag}
+                    />
+                  ))}
+                </div>
+                {longoGroups.length === 0 && (
+                  <div style={{ textAlign: 'center', padding: '24px 20px', color: '#1e40af' }}>
+                    <div style={{ fontSize: 28, marginBottom: 6 }}>📆</div>
+                    <div style={{ fontSize: 12 }}>Nenhum grupo de longo prazo</div>
+                    <div style={{ fontSize: 11, marginTop: 2, color: '#1e40af' }}>Use as setas nos grupos ou adicione abaixo</div>
+                  </div>
+                )}
+              </div>
+              <div style={{ padding: '10px 16px', background: `${C.longoBorder}33`, borderTop: `1px solid ${C.longoBorder}55` }}>
+                <button
+                  onClick={() => addGroup('longoPrazo')}
+                  style={{ padding: '6px 14px', borderRadius: 8, border: `1.5px dashed ${C.longoColor}`, background: 'transparent', color: C.longoColor, fontSize: 11, fontWeight: 600, cursor: 'pointer' }}
+                >
+                  + Novo grupo — Longo Prazo
+                </button>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
 
-      {/* ── Section: NÃO FAZER MENSAGEM (Sutil) ── */}
+      {/* ── Section: NÃO FAZER MENSAGEM ── */}
       <div style={{ maxWidth: 1280, margin: '0 auto' }}>
-        <div style={{
-          background: C.sectionNaoFazerBg,
-          border: `2px solid ${C.sectionNaoFazerBorder}`,
-          borderRadius: 16,
-          overflow: 'hidden',
-          opacity: 0.85,
-        }}>
-          <SectionHeader
-            icon="⏸️"
-            title="Não Fazer Mensagem"
-            subtitle={`${naoFazerGroups.length} grupo${naoFazerGroups.length !== 1 ? 's' : ''} • Motivos que não fazem sentido no momento para ativação`}
-            color={C.sectionNaoFazer}
-            bgColor={C.sectionNaoFazerBg}
-          />
-          <div style={{ padding: 16 }}>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-              gap: 12, alignItems: 'start',
-            }}>
-              {naoFazerGroups.map(group => (
-                <GroupBox
-                  key={group.id}
-                  group={group}
-                  section="naoFazer"
-                  dragging={dragging}
-                  dragFrom={dragFrom}
-                  onDragStart={handleDragStart}
-                  onDragEnd={handleDragEnd}
-                  onDrop={handleDrop}
-                  onRename={renameGroup}
-                  onDelete={deleteGroup}
-                  onMoveSection={moveGroupSection}
-                  messages={messages}
-                  allTags={allTags}
-                  onMessagesChange={updateMessages}
-                  onAddTag={addTag}
-                />
-              ))}
-            </div>
-            {naoFazerGroups.length === 0 && (
-              <div style={{ textAlign: 'center', padding: '40px 20px', color: '#94a3b8' }}>
-                <div style={{ fontSize: 32, marginBottom: 8 }}>📭</div>
-                <div>Nenhum grupo nesta seção</div>
-                <div style={{ fontSize: 12, marginTop: 4 }}>Use as setas ← nos grupos para mover para cá</div>
-              </div>
-            )}
-          </div>
-          <div style={{ padding: '12px 16px', background: '#f8fafc', borderTop: '1px solid #e2e8f0' }}>
-            <button
-              onClick={() => addGroup('naoFazer')}
-              style={{ padding: '8px 16px', borderRadius: 8, border: `1.5px dashed ${C.sectionNaoFazer}`, background: 'transparent', color: C.sectionNaoFazer, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
-            >
-              + Novo grupo
-            </button>
-          </div>
+        <SectionBlock
+          sectionKey="naoFazer"
+          icon="⏸️"
+          title="Não Fazer Mensagem"
+          subtitle="Motivos que não fazem sentido no momento para ativação"
+          color={C.sectionNaoFazer}
+          bgColor={C.sectionNaoFazerBg}
+          borderColor={C.sectionNaoFazerBorder}
+          groups={groups}
+          allGroups={allGroups}
+          dragging={dragging}
+          dragFrom={dragFrom}
+          handleDragStart={handleDragStart}
+          handleDragEnd={handleDragEnd}
+          handleDrop={handleDrop}
+          renameGroup={renameGroup}
+          deleteGroup={deleteGroup}
+          moveGroupSection={moveGroupSection}
+          messages={messages}
+          allTags={allTags}
+          onMessagesChange={updateMessages}
+          onAddTag={addTag}
+        />
+        <div style={{ padding: '12px 16px', background: '#f8fafc', borderTop: `1px solid ${C.border}`, borderRadius: '0 0 16px 16px', border: `2px solid ${C.sectionNaoFazerBorder}`, borderTop: 'none' }}>
+          <button
+            onClick={() => addGroup('naoFazer')}
+            style={{ padding: '8px 16px', borderRadius: 8, border: `1.5px dashed ${C.sectionNaoFazer}`, background: 'transparent', color: C.sectionNaoFazer, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
+          >
+            + Novo grupo — Não Fazer
+          </button>
         </div>
       </div>
     </div>
   )
 }
+
+// Default groups — migrate fazer groups to curtoPrazo (new default)
+const DEFAULT_GROUPS = [
+  { id: 'g1',  section: 'curtoPrazo', label: 'Timing / Momento',               cards: ['sz_timing','mk_timing'] },
+  { id: 'g2',  section: 'curtoPrazo', label: 'Concorrência',                   cards: ['sz_conc','mk_conc'] },
+  { id: 'g3',  section: 'curtoPrazo', label: 'Corretor / Imobiliária',         cards: ['sz_corretor','mk_corretor'] },
+  { id: 'g4',  section: 'curtoPrazo', label: 'Jurídico / Contratual',          cards: ['sz_juridico','mk_juridico'] },
+  { id: 'g5',  section: 'naoFazer',  label: 'Duplicado / Erro Admin',          cards: ['sz_dup','mk_dup'] },
+  { id: 'g6',  section: 'curtoPrazo', label: 'Sem Contato / Inatingível',      cards: ['sz_contato','mk_naoresp','mk_parou','mk_origem'] },
+  { id: 'g7',  section: 'curtoPrazo', label: 'Perfil — Financeiro',            cards: ['sz_fgts','sz_pgto','sz_entrada','sz_total','mk_cond','mk_entrada','mk_total'] },
+  { id: 'g8',  section: 'curtoPrazo', label: 'Perfil — Produto / Características', cards: ['sz_tam','sz_garagem','sz_prazo','sz_spe','sz_cota','sz_outra_cota','mk_tam','mk_prazo','mk_spe','mk_loc'] },
+  { id: 'g9',  section: 'naoFazer',  label: 'Perfil — Intenção Incompatível', cards: ['sz_moradia','sz_hospede','sz_lgpd','sz_mora','mk_moradia'] },
+  { id: 'g10', section: 'naoFazer',  label: 'Redirecionamento Interno',       cards: ['sz_mkt','sz_szs','sz_decor_enc','sz_lanc_enc','sz_cly','sz_anfitriao','mk_lanc'] },
+  { id: 'g11', section: 'curtoPrazo', label: 'Catch-all / Descrição Obrigatória', cards: ['sz_catch','mk_catch'] },
+  { id: 'g12', section: 'naoFazer',  label: 'Imóvel fora do Perfil SZS',      cards: ['sz_icond','sz_idesc','sz_iitens'] },
+  { id: 'g13', section: 'curtoPrazo', label: 'Taxas / Custos Operacionais',    cards: ['sz_enxoval','sz_taxa_adm','sz_taxa_imp'] },
+  { id: 'g14', section: 'curtoPrazo', label: 'Exclusivo — Decor',             cards: ['sz_dcap','sz_dproj','sz_dobras'] },
+  { id: 'g15', section: 'naoFazer',  label: 'Exclusivo — Expansão / B2B',     cards: ['sz_efut','sz_esem','sz_b2b','sz_parceiro','sz_cliente','sz_resgate'] },
+  { id: 'g16', section: 'naoFazer',  label: 'Sem Grupo',                      cards: ['sz_vendeu','sz_regiao'] },
+]
